@@ -1,0 +1,158 @@
+html, body {
+    padding: 0;
+    margin: 0;
+    background: #eee;
+    height: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+.theater {
+    width: 100%;
+    background: black;
+    border: 1px solid transparent;
+
+    .top-section {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid transparent; //margin collapse
+
+        .video-container-dummy {
+            width: 1125px;
+            height: 632px;
+            margin: 100px auto 50px auto;
+        }
+
+        .top-section-bg-mask {
+            overflow: hidden;
+        }
+
+        .bg-img {
+            position: absolute;
+            height: 120%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            -webkit-filter: blur(10px);
+            opacity: 0.6;
+        }
+
+        &:after {
+            content: '';
+            background: -moz-linear-gradient(top, rgba(0,0,0,0) 15%, rgba(0,0,0,1) 100%); /* FF3.6+ */
+            background: -webkit-linear-gradient(top, rgba(0,0,0,0) 15%,rgba(0,0,0,1) 100%); /* Chrome10+,Safari5.1+ */
+            background: -o-linear-gradient(top, rgba(0,0,0,0) 15%,rgba(0,0,0,1) 100%); /* Opera 11.10+ */
+            background: -ms-linear-gradient(top, rgba(0,0,0,0) 15%,rgba(0,0,0,1) 100%); /* IE10+ */
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 15%,rgba(0,0,0,1) 100%); /* W3C */
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            bottom: 0;
+            z-index: 0;
+        }
+    }
+}
+
+#main-video-container, 
+#secondary-video-container {
+    width: 1125px;
+    margin: 0;
+    overflow: hidden;
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    right: 0;
+    z-index: 100;
+
+    &.docked {
+        position: fixed;
+        // top: 20px;
+        // left: 20px;
+        width: 300px;
+        border: 1px solid white;
+        box-shadow: 0 0 10px rgba(0,0,0,0.4);
+        z-index: 150;
+    }
+}
+
+.more-videos {
+    height: 180px;
+    overflow: hidden;
+    margin: 0 auto;
+    width: 1125px;
+    padding: 50px 0;
+    border-top: 1px solid rgba(255,255,255,0.5);
+    white-space: nowrap;
+}
+
+.playlist-videos {
+    overflow-x: scroll;
+    height: 150%;
+}
+
+.next-video {
+    width: 320px;
+    margin-right: 20px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: top;
+    white-space: normal;
+    font-size: 0;
+    position: relative;
+    cursor: pointer;
+
+    .title,
+    .duration,
+    .description {
+        position: absolute;
+        font-size: 1rem;
+        display: none; //temporarily
+    }
+
+    .thumb {
+        width: 100%;
+    }
+}
+
+.more-videos-below {
+    width: 1125px;
+    margin: 100px auto;
+
+    .playlist-videos {
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .next-video {
+        width: 240px;
+        margin-top: 20px;
+
+        .title,
+        .description {
+            position: static;
+            display: block;
+        }
+
+        .title {
+            font: normal normal 16px/1 "nyt-cheltenham", serif;
+            margin: .8em 0 .4em 0;
+        }
+
+        .description {
+            font: normal normal 11px/1.2 "nyt-franklin", sans-serif;
+            color: #8c8c8c;
+        }
+    }
+}
+
+.article {
+    width: 1125px;
+    margin: 100px auto;
+    padding-left: 190px;
+
+    p {
+        font: normal normal 16px/1.4 "Georgia", sans-serif;
+        max-width: 570px;
+    }
+}

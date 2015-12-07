@@ -1,0 +1,262 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/css/main.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script type="text/javascript" src="http://static01.nyt.com/video/vhs/vhs-2.x.min.js"></script>
+        <script type="text/javascript">
+            (function() {
+            var config = {
+                kitId: 'fdj3cyx',
+                scriptTimeout: 3000
+            };
+            var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=setTimeout(function(){h.className=h.className.replace(/(\s|^)wf-loading(\s|$)/g," ");h.className+=" wf-inactive"},config.scriptTimeout);var tk=document.createElement("script"),d=false;tk.src='//use.typekit.net/'+config.kitId+'.js';tk.type="text/javascript";tk.async="true";tk.onload=tk.onreadystatechange=function(){var a=this.readyState;if(d||a&&a!="complete"&&a!="loaded")return;d=true;clearTimeout(t);try{Typekit.load(config)}catch(b){}};var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(tk,s)
+            })();
+        </script>
+    </head>
+    <body>
+
+    {{{ body }}}
+
+    <script>
+    var player = VHS.player({
+        env: 'production',
+        container: 'main-video',
+        width: "100%",
+        height: "100%",
+        ads: false,
+        id: $('#main-video').attr('data-video-id'),
+        cover: {
+            mode: 'article'
+        },
+        controlsOverlay: {
+            mode: 'article'
+        }
+    });
+
+    player.playing = false;
+    window.autoScrollFromBottom = false;
+
+    function fillSomeVideos(start,end) {
+        console.log("start:"+start);
+        var vids = $('.next-video').slice(start, end);
+        vids.each(function (key, value) {
+            var id = $(value).attr('data-video-id');
+            if($(value).hasClass('filled')) {
+                return;
+            }
+            $.ajax({
+                dataType: "json",
+                url: '/video/'+id,
+                success: function (data, status) {
+                    if($(value).hasClass('filled')) {
+                        return;
+                    }
+                    var title = $('<div>').addClass('title').text(data.title);
+                    var description = $('<div>').addClass('description').text(data.description);
+                    var duration = $('<div>').addClass('duration').text(data.duration);
+                    var thumb = $('<image class="thumb">').attr('src', data.thumb);
+                    $(value).append(thumb, title, description);
+                    $(value).addClass('filled');
+                },
+                error: function (data) {
+                    if($(value).hasClass('filled')) {
+                        return;
+                    }
+                    var title = $('<div>').addClass('title').text('Video Unavailable');
+                    $(value).append(title);
+                    $(value).addClass('filled error');
+                }
+            });
+        });
+    }
+
+    function loadNewVideo(newVideoID) {
+        $.ajax({
+            dataType: "json",
+            url: '/video/'+newVideoID,
+            success: function (data, status) {
+                $('.bg-img').attr('src', data.cover);
+                var container_id;
+                if($('#main-video-container').hasClass('docked')) {
+                    if($('#secondary-video').hasClass('occupied')) {
+                        console.log('hi');
+                        var second = VHS.findInstance('secondary-video');
+                        second.destroy();
+                        $('#secondary-video-container').append($("<div id='secondary-video' class='occupied'></div>"));
+                        container_id = 'secondary-video';
+                    } else {
+                        container_id = 'secondary-video';
+                        $('#secondary-video').addClass('occupied');
+                    }
+                } else {
+                    player.destroy();
+                    $('#main-video-container').append($("<div id='main-video'></div>"));
+                    container_id = 'main-video';
+                }
+                player = VHS.player({
+                    env: 'production',
+                    container: container_id,
+                    width: "100%",
+                    height: "100%",
+                    ads: false,
+                    id: newVideoID,
+                    cover: {
+                        mode: 'article'
+                    },
+                    controlsOverlay: {
+                        mode: 'article'
+                    },
+                    autoplay: !($('#main-video-container').hasClass('docked'))
+                });
+                player.playing = false;
+                player.ready(playerEventResponses);
+            }
+        });
+    }
+
+    function toggleFixedPlayer(isCurrentlyFixed) {
+        if( isCurrentlyFixed !== player.container.parent().hasClass('docked') ) {
+            return;
+        }
+        var scrollDepth = $('body').scrollTop();
+        var fullHeight = $('.video-container-dummy').height();
+        var fullWidth = $('.video-container-dummy').width();
+        var padding = 20;
+        var positions = {
+            'absolute': {
+                'docked': {
+                    'top': padding + scrollDepth,
+                    'left': padding
+                },
+                'undocked': {
+                    'top': 100,
+                    'left': "50%",
+                    'transform': 'translateX(-50%)'
+                }
+            },
+            'fixed': {
+                'docked': {
+                    'top': padding,
+                    'left': padding,
+                    'transform': 'translateX(0)'
+                },
+                'undocked': {
+                    'top': 100 - scrollDepth,
+                    'left': "50%",
+                    'transform': 'translateX(-50%)'
+                }
+            }
+        }
+        if(isCurrentlyFixed) {
+            $('#main-video-container').css('position', 'absolute');
+            $('#main-video-container').css('transition', 'none');
+            $('#main-video-container').css(positions.absolute.docked);
+            setTimeout(function (arguments) {
+                $('#main-video-container').css('transition', 'all .3s');
+                $('#main-video-container').css(positions.absolute.undocked);
+                $('#main-video-container').removeClass('docked');
+            }, 300)
+        } else {
+            $('#main-video-container').css('position', 'fixed');
+            $('#main-video-container').css('transition', 'none');
+            $('#main-video-container').css(positions.fixed.undocked);
+            setTimeout(function (arguments) {
+                $('#main-video-container').css('transition', 'all .3s');
+                $('#main-video-container').css(positions.fixed.docked);
+                $('#main-video-container').addClass('docked');
+            }, 300)
+        }
+        disableControls();
+    }
+
+    function disableControls() {
+        player.controls.hide();
+        player.container.find('.vhs-plugin-container-controlsOverlay').hide();
+    }
+
+    $('body')
+    .on('keydown', function (e) {
+        var which = e.key ? e.key : e.keyCode;
+        /*k*/
+        if(which === 75) {
+            toggleFixedPlayer($('#main-video-container').hasClass("docked"));
+        }
+    });
+
+    $(document)
+    .on('scroll', function (e) {
+        var scrollDepth = $(this).scrollTop();
+        var containerBottom = $('.video-container-dummy').offset().top + $('.video-container-dummy').height();
+        if(scrollDepth > containerBottom - 200) {
+            if(player.playing && !autoScrollFromBottom) {
+                toggleFixedPlayer(false);
+            }
+        } else {
+            if(!$('#secondary-video').hasClass('occupied')) {
+                toggleFixedPlayer(true);
+            }
+        }
+    })
+
+    $('.next-video')
+    .on('click', function (e) {
+        loadNewVideo($(this).attr('data-video-id'));
+        if($(this).parents('.more-videos-below').length > 0) {
+            window.autoScrollFromBottom = true;
+            $('body').animate({
+                scrollTop: 0
+            }, 300, function () {
+                window.autoScrollFromBottom = false;
+            });
+        }
+    })
+
+    function playerEventResponses () {
+        //make player bg
+        $.ajax({
+            dataType: "json",
+            url: '/video/'+$('#main-video').attr('data-video-id'),
+            success: function (data, status) {
+                $('.bg-img').attr('src', data.cover);
+            }
+        })
+        fillSomeVideos(0, 10);
+        player.container.on('mouseover mousemove', function (e) {
+            if($(this).parent().hasClass('docked')) {
+                disableControls();
+            }
+        })
+        player.on('play', function (e) {
+            if(this.container.parent().hasClass('docked')) {
+                disableControls();
+            } else {
+                if($('.docked').length > 0) {
+                    //swap out the two players
+                    player = VHS.findInstance("main-video")
+                    player.load(this._data.id, true);
+                    this.destroy();
+                    $('#secondary-video-container').append('<div id="secondary-video"></div>');
+                    toggleFixedPlayer(true);
+                }
+            }
+            player.playing = true;
+        })
+        player.on('pause', function (e) {
+            if(this.container.parent().hasClass('docked')) {
+                disableControls();
+            }
+            player.playing = false;
+        })
+    }
+
+    player.ready(playerEventResponses);
+
+    </script>
+    </body>
+</html>
