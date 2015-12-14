@@ -1,3 +1,4 @@
+me
 # start
 
-`node index.html`
+`node index.js`
